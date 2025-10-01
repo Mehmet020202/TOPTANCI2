@@ -27,6 +27,18 @@ export function useAuth() {
       setLoading(false);
     });
 
+    // Handle redirect result
+    getRedirectResult(auth)
+      .then((result) => {
+        if (result?.user) {
+          console.log('Google ile giriş başarılı');
+        }
+      })
+      .catch((error) => {
+        console.error('Redirect hatası:', error);
+        setError(getErrorMessage(error.code));
+      });
+
     return unsubscribe;
   }, []);
 
@@ -66,6 +78,18 @@ export function useAuth() {
     try {
       setError(null);
       setLoading(true);
+      
+      // Mobil cihaz kontrolü
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+      
+      if (isMobile) {
+        // Mobil cihazlarda özel ayarlar
+        googleProvider.setCustomParameters({
+          prompt: 'select_account',
+          login_hint: ''
+        });
+      }
+      
       await signInWithRedirect(auth, googleProvider);
     } catch (err) {
       const authError = err as AuthError;
