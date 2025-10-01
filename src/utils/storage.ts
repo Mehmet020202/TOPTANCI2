@@ -11,6 +11,20 @@ export function saveToStorage(data: AppData): void {
   }
 }
 
+// Safe date parsing function
+function safeParseDateString(dateString: string | Date): Date {
+  if (dateString instanceof Date) {
+    return isNaN(dateString.getTime()) ? new Date() : dateString;
+  }
+  
+  if (typeof dateString === 'string') {
+    const parsed = new Date(dateString);
+    return isNaN(parsed.getTime()) ? new Date() : parsed;
+  }
+  
+  return new Date();
+}
+
 export function loadFromStorage(): AppData {
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
@@ -18,10 +32,10 @@ export function loadFromStorage(): AppData {
       const data = JSON.parse(stored);
       // Tarihleri Date objesine çevir
       data.traders.forEach((trader: { lastTransactionDate: string | Date }) => {
-        trader.lastTransactionDate = new Date(trader.lastTransactionDate);
+        trader.lastTransactionDate = safeParseDateString(trader.lastTransactionDate);
       });
       data.transactions.forEach((transaction: { date: string | Date }) => {
-        transaction.date = new Date(transaction.date);
+        transaction.date = safeParseDateString(transaction.date);
       });
       return data;
     }
@@ -44,10 +58,10 @@ export function importFromJSON(jsonString: string): AppData {
   const data = JSON.parse(jsonString);
   // Tarihleri Date objesine çevir
   data.traders.forEach((trader: { lastTransactionDate: string | Date }) => {
-    trader.lastTransactionDate = new Date(trader.lastTransactionDate);
+    trader.lastTransactionDate = safeParseDateString(trader.lastTransactionDate);
   });
   data.transactions.forEach((transaction: { date: string | Date }) => {
-    transaction.date = new Date(transaction.date);
+    transaction.date = safeParseDateString(transaction.date);
   });
   return data;
 }

@@ -29,6 +29,15 @@ class ErrorBoundary extends Component<Props, State> {
         this.setState({ hasError: false });
       }, 1000);
     }
+    
+    // Handle date format errors
+    if (error instanceof RangeError && error.message.includes('Invalid time value')) {
+      console.warn('Date format error caught:', error);
+      // Clear the error state to allow recovery
+      setTimeout(() => {
+        this.setState({ hasError: false });
+      }, 1500);
+    }
   }
 
   public render() {
